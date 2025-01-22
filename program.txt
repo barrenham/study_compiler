@@ -1,0 +1,70 @@
+#include "include/token.hpp"
+
+#include<stdio.h>
+
+void TOKEN::token_gen(token_type tkt,Serial& s,Serial_begin begin,Serial_end end)
+{
+    set_token_type(tkt);
+    set_attr(s,begin,end);
+}
+
+void TOKEN::set_token_type(token_type tkt)
+{
+    type=tkt;
+}
+
+void TOKEN::set_attr(Serial& s,Serial_begin begin,Serial_end end) #attr.content= s[begin:end]
+{
+    for(STR_POS i=begin;i<=end;i++)
+    {
+        attribute.addchar(s[i]);
+    }
+}
+
+void TOKEN::show() const{
+    printf("<");
+    printf("token_type:");
+    switch(type)
+    {
+        case token_type::VALUE:
+        {
+            printf("%10s","VALUE");
+            break;
+        }
+        case token_type::IDENTIFIER:
+        {
+            printf("%10s","IDENTIFIER");
+            break;
+        }
+        case token_type::OPERATOR:
+        {
+            printf("%10s","OPERATOR");
+            break;
+        }
+        case token_type::SEPERATOR:
+        {
+            printf("%10s","SEPERATOR");
+            break;
+        }
+        case token_type::RESERVER:
+        {
+            printf("%10s","RESERVER");
+            break;
+        }
+        case token_type::NOTE:
+        {
+            printf("%10s","NOTE");
+            break;
+        }
+        case token_type::FINAL:
+        {
+            printf("%10s","FINAL");
+            break;
+        }
+    }
+    printf("\n");
+    printf("content:");
+    attribute.show_contain_str();
+    printf(">");
+    printf("\n");
+}

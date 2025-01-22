@@ -1,0 +1,7 @@
+include_directories(../token/include)
+include_directories(../general_type/include)
+include_directories(../EXCEPTION/include)
+include_directories(include)
+
+file(GLOB TP_SOURCE_FILES "*.cpp")
+add_library(text_parser OBJECT ${TP_SOURCE_FILES})
