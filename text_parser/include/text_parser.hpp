@@ -2,8 +2,11 @@
 #define TEXT_PARSER_HPP
 
 #include <string>
+#include <list>
+#include <memory>
 #include "general_type.hpp"
 #include "token.hpp"
+
 
 class TEXT_PARSER_ERROR_GRAMMAR:public std::exception
 {
@@ -18,7 +21,7 @@ private:
 
 class TEXT_PARSER{
 public:
-    void  program(Serial str);
+    std::shared_ptr<TOKEN_LIST> program(Serial str);
     TOKEN match(Serial&str,STR_POS& pos);
     inline void next(STR_POS& pos);
 private:

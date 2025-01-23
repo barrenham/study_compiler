@@ -58,21 +58,26 @@ bool TEXT_PARSER::isStrSp(char c)
     return (c=='\"');
 }
 
-void TEXT_PARSER::program(Serial str)
+std::shared_ptr<TOKEN_LIST> TEXT_PARSER::program(Serial str)
 {
+    std::shared_ptr<TOKEN_LIST> tl_ptr=std::make_shared<TOKEN_LIST>();
     STR_POS pos=0;
     LOOP_VALUE_CHECKER LVC(pos,1);
     while(str[pos]!=CTYPE_STR_END){
         try{
             TOKEN token=match(str,pos);
-            token.show();
+            // token.show();
             LVC.checkpoint(pos);
+            if(token.get_token_type()!=token_type::NOTE){
+                (tl_ptr.get())->push_back(token);
+            }
         }
         catch(TEXT_PARSER_ERROR_GRAMMAR&e){
             printf("\nERROR:%s\n",e.what());
-            return;
+            return nullptr;
         }
     }
+    return tl_ptr;
 }
 
 void TEXT_PARSER::next(STR_POS& pos){
@@ -113,9 +118,10 @@ TOKEN TEXT_PARSER::match(Serial& str,STR_POS& pos){
             end=pos;
             next(pos);
         }while(isAlpha(str[pos])||isDigit(str[pos])||(isUdl(str[pos])));
-        
-        if(rtoken_checker.check(str,begin,end)!=reserver_type::NOT_RESERVER_TYPE){
+        reserver_type rt=rtoken_checker.check(str,begin,end);
+        if(rt!=reserver_type::NOT_RESERVER_TYPE){
             item.token_gen(token_type::RESERVER,str,begin,end);
+            item.set_reserver_type(rt);
         }else{
             item.token_gen(token_type::IDENTIFIER,str,begin,end);
         }

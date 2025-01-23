@@ -5,8 +5,17 @@
 #include<string.h>
 #include "token.hpp"
 
+token_type TOKEN::get_token_type() const
+{
+    return type;
+}
 
-void TOKEN::token_gen(token_type tkt,Serial& s,Serial_begin begin,Serial_end end)
+TOKEN_CONTAIN_STR TOKEN::get_attribute() const
+{
+    return attribute.get_contain_str();
+}
+
+void TOKEN::token_gen(token_type tkt, Serial &s, Serial_begin begin, Serial_end end)
 {
     set_token_type(tkt);
     set_attr(s,begin,end);
@@ -25,7 +34,8 @@ void TOKEN::set_attr(Serial& s,Serial_begin begin,Serial_end end) //attr.content
     }
 }
 
-void TOKEN::show() const{
+void TOKEN::show() const
+{
     printf("<");
     printf("token_type:");
     switch(type)
@@ -53,6 +63,7 @@ void TOKEN::show() const{
         case token_type::RESERVER:
         {
             printf("%10s","RESERVER");
+            printf("(%d)",this->rtype);
             break;
         }
         case token_type::NOTE:
@@ -71,16 +82,37 @@ void TOKEN::show() const{
             break;
         }
     }
-    printf("\n");
+    printf(" ");
     printf("content:");
     attribute.show_contain_str();
     printf(">");
-    printf("\n");
 }
-void RESERVE_TOKEN::set_reserver_type(reserver_type rtype)
+void TOKEN::set_reserver_type(reserver_type rtype)
 {
     this->rtype=rtype;
 }
+
+TOKEN::TOKEN(const TOKEN& other)
+{
+    if(this!=&other)
+    {
+        type=other.type;
+        rtype=other.rtype;
+        attribute=other.attribute;
+    }
+}
+
+TOKEN& TOKEN::operator=(const TOKEN& other)
+{
+    if(this!=&other)
+    {
+        type=other.type;
+        rtype=other.rtype;
+        attribute=other.attribute;
+    }
+    return *this;
+}
+
 
 const char RTOKEN_CHECKER::rtoken_table[MAX_RTOKEN_TYPE][RTOKEN_MAX_LEN]=
 {
@@ -125,4 +157,110 @@ bool RTOKEN_CHECKER::CMP_string(const Serial &s1, Serial_begin begin_s1, Serial_
         }
     }
     return true;
+}
+
+void AST_TOKEN::token_gen(ast_token_type att,TOKEN tk)
+{
+    this->att=att;
+    this->ast_token_attribute.add_string(tk);
+    this->ast_token_list.push_back(tk);
+}
+
+void AST_TOKEN::token_gen(ast_token_type att)
+{
+    this->att=att;
+}
+
+void AST_TOKEN::token_gen(ast_token_type att, AST_TOKEN tk)
+{
+    this->att=att;
+    this->ast_token_attribute.add_string(tk);
+    this->ast_token_list.push_back(tk);
+}
+
+void AST_TOKEN::AST_LIST_append_to_front(AST_TOKEN tk)
+{
+    this->ast_token_list.push_front(tk);
+}
+
+void AST_TOKEN::AST_LIST_append_to_front(TOKEN tk)
+{
+    this->ast_token_list.push_front(AST_TOKEN(tk));
+}
+
+void AST_TOKEN::AST_LIST_append_to_end(TOKEN tk)
+{
+    this->ast_token_list.push_back(AST_TOKEN(tk));
+}
+
+void AST_TOKEN::AST_LIST_append_to_end(AST_TOKEN tk)
+{
+    this->ast_token_list.push_back(tk);
+}
+
+void AST_TOKEN::AST_LIST_pop_end()
+{
+    this->ast_token_list.pop_back();
+}
+
+void AST_TOKEN::AST_TOKEN_CONTAIN_STRING_append_to_front(TOKEN_CONTAIN_STR str)
+{
+    ast_token_attribute.add_string_to_front(str);
+}
+
+ast_token_type AST_TOKEN::get_ast_token_type() const
+{
+    return this->att;
+}
+
+TOKEN_CONTAIN_STR AST_TOKEN::get_attribute() const
+{
+    return ast_token_attribute.get_contain_str();
+}
+
+void AST_TOKEN::show() const
+{
+    switch(att){
+        case ast_token_type::FUNC:{
+            printf("[ast_type:%10s] <-","FUNC");
+            for(const auto& a:ast_token_list){
+                a.show();
+            }
+            printf("->");
+            break;
+        }
+        case ast_token_type::DIR:{
+            printf("[ast_type:%10s]","DIR");
+            for(const auto& a:ast_token_list){
+                a.show();
+            }
+            break;
+        }
+        case ast_token_type::NOTYPE:{
+            printf("%s#",TOKEN::get_attribute().c_str());
+        }
+    }
+}
+
+AST_TOKEN::AST_TOKEN(const AST_TOKEN&other): TOKEN(other)
+{
+    if(this!=&other)
+    {
+        TOKEN::operator=(other);
+        ast_token_attribute=other.ast_token_attribute;
+        att=other.att;
+        ast_token_list=other.ast_token_list;
+    }
+}
+
+AST_TOKEN& AST_TOKEN::operator=(const AST_TOKEN& other)
+{
+    if(this!=&other)
+    {
+        TOKEN::operator=(other);
+        ast_token_attribute=other.ast_token_attribute;
+        att=other.att;
+        ast_token_list=other.ast_token_list;
+    }
+    return *this;
 }
